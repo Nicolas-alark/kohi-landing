@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KŌHI — Café de Especialidad por Suscripción</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F5F0E8;
+      --espresso: #1C1410;
+      --roast: #3D2B1F;
+      --caramel: #C8924A;
+      --mist: #E8E0D0;
+      --text-muted: #7A6A58;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--cream);
+      color: var(--espresso);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ──────── NAV ──────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 4rem;
+      background: transparent;
+      mix-blend-mode: normal;
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.2em;
+      color: var(--espresso);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--espresso); }
+
+    /* ──────── HERO ──────── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-visual {
+      background: var(--roast);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 30% 60%, #5C3A28 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 20%, #2A1A10 0%, transparent 60%);
+    }
+
+    /* Decorative coffee ring SVG */
+    .coffee-ring {
+      position: relative;
+      z-index: 1;
+      width: 340px;
+      height: 340px;
+    }
+
+    .steam-line {
+      stroke-dasharray: 20 10;
+      animation: steam 3s ease-in-out infinite;
+      opacity: 0;
+    }
+    .steam-line:nth-child(2) { animation-delay: 0.5s; }
+    .steam-line:nth-child(3) { animation-delay: 1s; }
+
+    @keyframes steam {
+      0%   { opacity: 0; transform: translateY(0); }
+      30%  { opacity: 0.7; }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8rem 5rem 4rem;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--caramel);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 4vw, 4.2rem);
+      line-height: 1.1;
+      color: var(--espresso);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--caramel);
+    }
+
+    .hero-desc {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+      max-width: 38ch;
+      margin-bottom: 3rem;
+      font-weight: 300;
+    }
+
+    /* ──────── FORM ──────── */
+    .subscribe-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 420px;
+    }
+
+    .form-label {
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--espresso);
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+
+    .email-input-wrap {
+      display: flex;
+      border: 1.5px solid var(--espresso);
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .email-input {
+      flex: 1;
+      padding: 1rem 1.25rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--espresso);
+    }
+
+    .email-input::placeholder { color: var(--text-muted); }
+
+    .submit-btn {
+      padding: 1rem 1.5rem;
+      background: var(--espresso);
+      color: var(--cream);
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .submit-btn:hover { background: var(--roast); }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .form-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Toast */
+    .toast {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.85rem;
+      border-left: 3px solid;
+      background: white;
+    }
+
+    .toast.success {
+      display: flex;
+      border-color: #4CAF50;
+      color: #2E7D32;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .toast.error {
+      display: flex;
+      border-color: #E24B4A;
+      color: #A32D2D;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ──────── FEATURES ──────── */
+    .features {
+      background: var(--espresso);
+      color: var(--cream);
+      padding: 5rem 4rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4rem;
+    }
+
+    .feature-icon {
+      width: 36px;
+      height: 1.5px;
+      background: var(--caramel);
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-num {
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--caramel);
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-text {
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: #9A8B7C;
+      font-weight: 300;
+    }
+
+    /* ──────── ORIGINS ──────── */
+    .origins {
+      padding: 6rem 4rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .origins-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--caramel);
+      margin-bottom: 1.25rem;
+    }
+
+    .origins-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+
+    .origins-text {
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+
+    .origin-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+
+    .origin-tag {
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--mist);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .origins-map {
+      position: relative;
+      height: 360px;
+      background: var(--mist);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .map-dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--caramel);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+
+    .map-dot::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1px solid var(--caramel);
+      opacity: 0.4;
+      animation: ring 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    @keyframes ring {
+      0% { transform: scale(1); opacity: 0.4; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    /* ──────── FOOTER ──────── */
+    footer {
+      background: var(--roast);
+      color: #7A6A58;
+      padding: 2.5rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+    }
+
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      color: var(--cream);
+      font-size: 1.2rem;
+      letter-spacing: 0.2em;
+    }
+
+    /* ──────── RESPONSIVE ──────── */
+    @media (max-width: 900px) {
+      nav { padding: 1.25rem 2rem; }
+      .nav-links { display: none; }
+
+      .hero { grid-template-columns: 1fr; }
+      .hero-visual { height: 45vh; }
+      .hero-content { padding: 3rem 2rem 4rem; }
+      .email-input-wrap { flex-direction: column; }
+      .submit-btn { width: 100%; padding: 1rem; }
+
+      .features {
+        grid-template-columns: 1fr;
+        padding: 4rem 2rem;
+        gap: 2.5rem;
+      }
+
+      .origins {
+        grid-template-columns: 1fr;
+        padding: 4rem 2rem;
+        gap: 2.5rem;
+      }
+
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">KŌHI</div>
+    <ul class="nav-links">
+      <li><a href="#">Orígenes</a></li>
+      <li><a href="#">Proceso</a></li>
+      <li><a href="#">Suscripción</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+
+    <div class="hero-visual">
+      <!-- Decorative coffee SVG illustration -->
+      <svg class="coffee-ring" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Saucer -->
+        <ellipse cx="170" cy="265" rx="110" ry="22" fill="#2A1A10" opacity="0.6"/>
+        <!-- Cup body -->
+        <path d="M100 180 Q100 260 170 265 Q240 260 240 180 L230 130 L110 130 Z" fill="#4A2E20"/>
+        <path d="M115 180 Q115 250 170 255 Q225 250 225 180 L217 140 L123 140 Z" fill="#5C3A28"/>
+        <!-- Cup rim -->
+        <ellipse cx="170" cy="130" rx="57" ry="10" fill="#6B4535"/>
+        <ellipse cx="170" cy="130" rx="50" ry="8" fill="#7A5040"/>
+        <!-- Coffee surface -->
+        <ellipse cx="170" cy="135" rx="48" ry="7" fill="#3D2010"/>
+        <!-- Crema swirl -->
+        <path d="M148 133 Q158 128 170 133 Q182 138 192 133" stroke="#C8924A" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <path d="M155 138 Q163 134 172 137 Q181 140 188 136" stroke="#C8924A" stroke-width="1" fill="none" opacity="0.4"/>
+        <!-- Handle -->
+        <path d="M240 150 Q275 155 275 190 Q275 215 240 218" stroke="#6B4535" stroke-width="12" fill="none" stroke-linecap="round"/>
+        <path d="M240 150 Q268 155 268 190 Q268 210 240 212" stroke="#5C3A28" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <!-- Steam -->
+        <path class="steam-line" d="M155 118 Q150 102 157 88" stroke="#C8924A" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path class="steam-line" d="M170 114 Q165 98 172 84" stroke="#C8924A" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path class="steam-line" d="M185 118 Q180 102 187 88" stroke="#C8924A" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Decorative ring -->
+        <circle cx="170" cy="170" r="148" stroke="#C8924A" stroke-width="0.5" opacity="0.2"/>
+        <circle cx="170" cy="170" r="162" stroke="#C8924A" stroke-width="0.3" opacity="0.12"/>
+      </svg>
+    </div>
+
+    <div class="hero-content">
+      <p class="hero-eyebrow">Suscripción de café de especialidad</p>
+      <h1 class="hero-title">
+        El café que<br/><em>mereces</em>,<br/>cuando lo deseas
+      </h1>
+      <p class="hero-desc">
+        Granos de origen único, tostados a mano en Bogotá cada semana. Recíbelos en tu puerta con notas de cata, recetas y la historia detrás de cada cosecha.
+      </p>
+
+      <form class="subscribe-form" id="subscribeForm">
+        <label class="form-label" for="email">Tu correo electrónico</label>
+        <div class="email-input-wrap">
+          <input
+            type="email"
+            id="email"
+            name="user_email"
+            class="email-input"
+            placeholder="nombre@ejemplo.com"
+            required
+            autocomplete="email"
+          />
+          <button type="submit" class="submit-btn" id="submitBtn">
+            Suscribirse →
+          </button>
+        </div>
+        <div id="formToast" class="toast"></div>
+        <p class="form-note">
+          Sin spam. Solo café, novedades y ofertas exclusivas para suscriptores.<br/>
+          Cancela cuando quieras.
+        </p>
+      </form>
+    </div>
+
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div>
+      <div class="feature-icon"></div>
+      <p class="feature-num">01 — Selección</p>
+      <h3 class="feature-title">Orígenes certificados</h3>
+      <p class="feature-text">Trabajamos directamente con familias cafeteras en Huila, Nariño y Sierra Nevada. Cada bolsa lleva el nombre del productor.</p>
+    </div>
+    <div>
+      <div class="feature-icon"></div>
+      <p class="feature-num">02 — Tostión</p>
+      <h3 class="feature-title">Fresco a tu medida</h3>
+      <p class="feature-text">Tostamos el día antes del envío. No más café rancio de supermercado. Cada gramo llega en su punto óptimo de desgasificación.</p>
+    </div>
+    <div>
+      <div class="feature-icon"></div>
+      <p class="feature-num">03 — Comunidad</p>
+      <h3 class="feature-title">Aprende mientras tomas</h3>
+      <p class="feature-text">Cada entrega incluye una guía de preparación, notas de cata y acceso a nuestra comunidad de baristas y amantes del café.</p>
+    </div>
+  </section>
+
+  <!-- ORIGINS -->
+  <section class="origins">
+    <div>
+      <p class="origins-label">Nuestros Orígenes</p>
+      <h2 class="origins-title">Del cafetal a tu taza, con nombre propio</h2>
+      <p class="origins-text">
+        Colombia es el tercer productor de café del mundo, pero el café más extraordinario no está en los supermercados — está en pequeñas fincas que cultivan con técnicas ancestrales y pasión familiar. Nosotros los encontramos, tú los disfrutas.
+      </p>
+      <div class="origin-tags">
+        <span class="origin-tag">Huila</span>
+        <span class="origin-tag">Nariño</span>
+        <span class="origin-tag">Sierra Nevada</span>
+        <span class="origin-tag">Antioquia</span>
+        <span class="origin-tag">Cauca</span>
+      </div>
+    </div>
+    <div class="origins-map">
+      <!-- Simplified decorative map of Colombia -->
+      <svg viewBox="0 0 280 360" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:240px; height:300px; opacity:0.35;">
+        <path d="M90 20 Q60 25 45 55 Q30 85 35 115 Q20 130 25 155 Q15 175 30 195 Q25 215 40 235 Q50 270 75 285 Q100 310 130 320 Q155 330 175 310 Q195 290 205 265 Q220 240 215 215 Q230 195 220 170 Q235 145 225 120 Q235 90 220 65 Q205 35 185 25 Q165 15 140 20 Q115 18 90 20Z" fill="#3D2B1F"/>
+      </svg>
+      <!-- Location dots -->
+      <div class="map-dot" style="top:38%; left:42%;"></div>
+      <div class="map-dot" style="top:52%; left:38%; animation-delay:0.8s;"></div>
+      <div class="map-dot" style="top:22%; left:55%; animation-delay:1.4s;"></div>
+      <div class="map-dot" style="top:44%; left:50%; animation-delay:0.4s;"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">KŌHI</div>
+    <p>© 2024 KŌHI Colombia · Bogotá, D.C.</p>
+    <p>Café de especialidad · Por suscripción</p>
+  </footer>
+
+  <script>
+    // ── EmailJS INIT ──
+    // ⚠️ INSTRUCCIONES DE CONFIGURACIÓN:
+    // 1. Crea cuenta gratis en https://www.emailjs.com
+    // 2. Crea un Service (Gmail, Outlook, etc.) → copia tu SERVICE_ID
+    // 3. Crea un Template con las variables: {{to_email}}, {{from_name}} → copia tu TEMPLATE_ID
+    // 4. Ve a Account → API Keys → copia tu PUBLIC_KEY
+    // 5. Reemplaza los valores de abajo con los tuyos
+
+    const EMAILJS_CONFIG = {
+      publicKey:   "TU_PUBLIC_KEY",      // ← reemplaza
+      serviceId:   "TU_SERVICE_ID",      // ← reemplaza
+      templateId:  "TU_TEMPLATE_ID",     // ← reemplaza
+    };
+
+    emailjs.init({ publicKey: EMAILJS_CONFIG.publicKey });
+
+    // ── FORM LOGIC ──
+    const form     = document.getElementById('subscribeForm');
+    const btn      = document.getElementById('submitBtn');
+    const toast    = document.getElementById('formToast');
+
+    function showToast(type, message) {
+      toast.className = `toast ${type}`;
+      toast.innerHTML = message;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      toast.className = 'toast';
+
+      // ── PLANTILLA HTML del correo de bienvenida (CSS inline) ──
+      const htmlTemplate = `
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#F5F0E8;font-family:'Georgia',serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F5F0E8;padding:40px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#1C1410;padding:40px 48px;text-align:center;">
+            <p style="margin:0;font-family:'Georgia',serif;font-size:28px;letter-spacing:0.25em;color:#F5F0E8;">KŌHI</p>
+            <p style="margin:8px 0 0;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#C8924A;">Café de Especialidad</p>
+          </td>
+        </tr>
+
+        <!-- Hero message -->
+        <tr>
+          <td style="background:#ffffff;padding:52px 48px 40px;">
+            <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#C8924A;">Bienvenido/a</p>
+            <h1 style="margin:0 0 20px;font-family:'Georgia',serif;font-size:32px;line-height:1.2;color:#1C1410;font-weight:400;">
+              Tu primer sorbo<br/><em style="color:#C8924A;">comienza aquí</em>
+            </h1>
+            <p style="margin:0 0 24px;font-size:15px;line-height:1.8;color:#5C4A3A;font-family:Arial,sans-serif;font-weight:300;">
+              Gracias por unirte a la comunidad KŌHI. Eres parte de algo especial: un círculo de personas que creen que el café puede ser una experiencia transformadora, no solo una rutina.
+            </p>
+            <p style="margin:0;font-size:15px;line-height:1.8;color:#5C4A3A;font-family:Arial,sans-serif;font-weight:300;">
+              Muy pronto recibirás nuestra primera selección — granos recién tostados con su historia completa, guía de preparación y notas de cata.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="background:#ffffff;padding:0 48px;">
+            <hr style="border:none;border-top:1px solid #E8E0D0;margin:0;"/>
+          </td>
+        </tr>
+
+        <!-- What to expect -->
+        <tr>
+          <td style="background:#ffffff;padding:36px 48px;">
+            <p style="margin:0 0 24px;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#1C1410;font-family:Arial,sans-serif;">Lo que recibirás</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:12px 16px 12px 0;border-bottom:1px solid #F0EAE0;vertical-align:top;width:30px;">
+                  <span style="font-size:18px;">☕</span>
+                </td>
+                <td style="padding:12px 0;border-bottom:1px solid #F0EAE0;">
+                  <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#1C1410;font-family:Arial,sans-serif;">Granos de origen único</p>
+                  <p style="margin:0;font-size:13px;color:#7A6A58;font-family:Arial,sans-serif;line-height:1.6;">Tostados en Bogotá, frescos cada semana</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px 12px 0;border-bottom:1px solid #F0EAE0;vertical-align:top;">
+                  <span style="font-size:18px;">📖</span>
+                </td>
+                <td style="padding:12px 0;border-bottom:1px solid #F0EAE0;">
+                  <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#1C1410;font-family:Arial,sans-serif;">Guía de cata y preparación</p>
+                  <p style="margin:0;font-size:13px;color:#7A6A58;font-family:Arial,sans-serif;line-height:1.6;">Aprende a extraer lo mejor de cada grano</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px 0;vertical-align:top;">
+                  <span style="font-size:18px;">🌱</span>
+                </td>
+                <td style="padding:12px 0 0;">
+                  <p style="margin:0 0 2px;font-size:14px;font-weight:600;color:#1C1410;font-family:Arial,sans-serif;">Historia del productor</p>
+                  <p style="margin:0;font-size:13px;color:#7A6A58;font-family:Arial,sans-serif;line-height:1.6;">Conoce la finca, la familia, el proceso</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <tr>
+          <td style="background:#1C1410;padding:40px 48px;text-align:center;">
+            <p style="margin:0 0 20px;font-size:14px;color:#9A8B7C;font-family:Arial,sans-serif;line-height:1.7;">
+              Mientras tanto, síguenos y descubre el detrás de escena de cada cosecha.
+            </p>
+            <a href="#" style="display:inline-block;padding:14px 36px;background:#C8924A;color:#1C1410;font-family:Arial,sans-serif;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;text-decoration:none;font-weight:600;">
+              Ver nuestro proceso →
+            </a>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#F5F0E8;padding:24px 48px;text-align:center;">
+            <p style="margin:0;font-size:11px;color:#9A8B7C;font-family:Arial,sans-serif;line-height:1.8;">
+              Recibiste este correo porque te suscribiste en kohicafe.co<br/>
+              <a href="#" style="color:#C8924A;text-decoration:none;">Cancelar suscripción</a> · Bogotá, Colombia
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+      // Los parámetros del template deben coincidir con las variables en tu template de EmailJS
+      const templateParams = {
+        to_email:    email,
+        from_name:   'KŌHI Café',
+        reply_to:    'hola@kohicafe.co',
+        html_content: htmlTemplate,
+        // Si usas un template simple en EmailJS, también puedes pasar:
+        subject:     '¡Bienvenido/a a KŌHI — Tu café de especialidad!',
+      };
+
+      try {
+        await emailjs.send(
+          EMAILJS_CONFIG.serviceId,
+          EMAILJS_CONFIG.templateId,
+          templateParams
+        );
+        showToast('success', '✓ ¡Listo! Revisa tu bandeja de entrada.');
+        form.reset();
+      } catch (err) {
+        console.error('EmailJS error:', err);
+        showToast('error', '⚠ Ocurrió un error. Intenta de nuevo.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Suscribirse →';
+      }
+    });
+  </script>
+
+</body>
+</html>
